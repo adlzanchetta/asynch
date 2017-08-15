@@ -34,7 +34,7 @@ void Advance(
     unsigned int last_idx, curr_idx, around;
     unsigned int two_my_N = 2 * my_N;
     int error_code;
-
+	
     //Initialize values for forcing data
     for (unsigned int i = 0; i < globals->num_forcings; i++)
     {
@@ -90,7 +90,9 @@ void Advance(
                 next_time = globals->t + globals->dump_time;
             }
             else
+			{
                 next_time = ceil(globals->t / globals->dump_time) * globals->dump_time;
+			}
 
             maxtime = min(maxtime, next_time);
         }
