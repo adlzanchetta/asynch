@@ -70,7 +70,7 @@ void Advance(
             if (forcings[i].active)
             {
                 //printf("Forcing %u is active  %e %e\n",i,sys[my_sys[0]]->last_t,forcings[i].maxtime);
-                if (fabs(globals->t - forcings[i].maxtime) < 1e-14)
+                if ((fabs(globals->t - forcings[i].maxtime) < 1e-14)  && (forcings[i].iteration < forcings[i].passes))
                 {
                     forcings[i].maxtime = forcings[i].GetNextForcing(sys, N, my_sys, my_N, assignments, globals, &forcings[i], db_connections, id_to_loc, i);
                     //(forcings[i].iteration)++;	if flag is 3 (dbc), this happens in GetNextForcing
