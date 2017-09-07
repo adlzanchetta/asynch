@@ -100,6 +100,10 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     for (unsigned int i = 0; i < num_stages; i++)
     {
         //v_copy_n(y_0, sum, link_i->dim);
+		printf("+begin: ");
+		for (unsigned int i = 0; i < link_i->dim; i++)
+			printf("%f, ", y_0[i]);
+		printf(" (y_0)\n");
         memcpy(sum, y_0, link_i->dim * sizeof(double));
         for (unsigned int j = 0; j < i; j++)
         {
@@ -114,6 +118,11 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
 
         double dt = c[i] * h;
 
+		printf("+Pre diff: ");
+		for (unsigned int i = 0; i < link_i->dim; i++)
+			printf("%f, ", sum[i]);
+		printf(" (sum)\n");
+
         link_i->differential(
             t + dt,
             sum, link_i->dim,
@@ -125,6 +134,11 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
             link_i->state,
             link_i->user,
             temp_k[i]);
+
+		printf("+Pos diff: ");
+		for (unsigned int i = 0; i < link_i->dim; i++)
+			printf("%f, ", temp_k[i]);
+		printf(" (temp_k)\n");
     }
 
     //Build the solution
