@@ -43,7 +43,7 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     double *sum = workspace->sum;
     double **temp_k = workspace->temp_k_slices;  
 
-	printf("Using ExplicitRKSolver...\n");
+	printf("+Using ExplicitRKSolver...\n");
 
     //Get the approximate solutions from each parent
     for (unsigned int i = 0; i < link_i->num_parents; i++)
@@ -152,6 +152,11 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         temp[i] = max(fabs(new_y[i]), fabs(y_0[i])) * error->reltol[i] + error->abstol[i];
 
     err_1 = nrminf2(sum, temp, 0, link_i->dim);
+	printf("+err_1: from ");
+	for (unsigned int i = 0; i < dim; i++)
+		printf("[%f, %f], ", sum[i], temp[i]);
+	printf("got %f.\n", err_1);
+
     double value_1 = pow(1.0 / err_1, 1.0 / meth->e_order);
 
     //Check the dense error (in inf norm) to determine if the step can be accepted
@@ -166,6 +171,11 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         temp[i] = max(fabs(new_y[i]), fabs(y_0[i])) * error->reltol_dense[i] + error->abstol_dense[i];
 
     err_d = nrminf2(sum, temp, 0, link_i->dim);
+	printf("+err_d: from ");
+	for (unsigned int i = 0; i < dim; i++)
+		printf("[%f, %f], ", sum[i], temp[i]);
+	printf("got %f.\n", err_d);
+
     double value_d = pow(1.0 / err_d, 1.0 / meth->d_order);
 
     //Determine a new step size for the next step
@@ -184,7 +194,7 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         }
 
         //Save the new data
-		printf("Saving the data as (%f < 1.0) and (%f < 1.0)...\n", err_1, err_d);
+		printf("+Saving the data as (%f < 1.0) and (%f < 1.0)...\n", err_1, err_d);
         link_i->last_t = t + h;
         link_i->current_iterations++;
         store_k(workspace->temp_k, globals->max_dim, new_node->k, num_stages, dense_indices, num_dense);
@@ -308,7 +318,7 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     }
     else
     {
-		printf("Trashing the data as (%f > 1.0) or (%f > 1.0)...\n", err_1, err_d);
+		printf("+Trashing the data as (%f > 1.0) or (%f > 1.0)...\n", err_1, err_d);
 
         //Trash the data from the failed step
         Undo_Step(&link_i->my->list);
