@@ -191,27 +191,32 @@ void Advance(
                     //If the current link is not too far ahead, it can compute some iterations
                     if (current->current_iterations < globals->iter_limit)
                     {
-						if ((print_level >= 2) && (my_rank == 0))
-							printf("       ...computting iteration %i (max %i).\n", current->current_iterations, globals->iter_limit);
+						// adlz
+						// if ((print_level >= 2) && (my_rank == 0))
+						//	printf("       ...computting iteration %i (max %i).\n", current->current_iterations, globals->iter_limit);
                         //Solve a few steps of the current link
                         if (current->num_parents == 0)	//Leaf
                         {
-							if ((print_level >= 2) && (my_rank == 0))
-								printf("       ...solving a leaf...\n");
+							// adlz
+							// if ((print_level >= 2) && (my_rank == 0))
+							//	printf("       ...solving a leaf...\n");
                             while (current->last_t + current->h < maxtime && current->current_iterations < globals->iter_limit)
                             {
-								if ((print_level >= 2) && (my_rank == 0))
-								{
-									printf("       ...iterating 1 (%i of %i)...\n", current->current_iterations, globals->iter_limit);
-									printf("         as %f + %f (%f) < %f.\n", current->last_t, current->h, current->last_t + current->h, maxtime);
-								}
+								// adlz
+								// if ((print_level >= 2) && (my_rank == 0))
+								// {
+								//	printf("       ...iterating 1 (%i of %i)...\n", current->current_iterations, globals->iter_limit);
+								//	printf("         as %f + %f (%f) < %f.\n", current->last_t, current->h, current->last_t + current->h, maxtime);
+								// }
                                 for (unsigned int i = 0; i < globals->num_forcings; i++)		//!!!! Put this in solver !!!!
                                     if (forcings[i].active && current->last_t < current->my->forcing_change_times[i])
                                         current->h = min(current->h, current->my->forcing_change_times[i] - current->last_t);
                                 current->rejected = current->solver(current, globals, assignments, print_flag, outputfile, &db_connections[ASYNCH_DB_LOC_HYDRO_OUTPUT], forcings, workspace);
                             }
-							if ((print_level >= 2) && (my_rank == 0))
-								printf("       ...iterating 1 done.\n");
+
+							// adlz
+							//if ((print_level >= 2) && (my_rank == 0))
+							//	printf("       ...iterating 1 done.\n");
 
                             if (current->last_t + current->h >= maxtime  && current->current_iterations < globals->iter_limit && current->last_t < maxtime)	//If less than a full step is needed, just finish up
                             {
@@ -380,8 +385,9 @@ void Advance(
                         while (done[last_idx] == 1 && last_idx > 0)
                             last_idx--;
 
-						if ((print_level >= 2) && (my_rank == 0))
-							printf("       about to trash...\n");
+						// adlz
+						//if ((print_level >= 2) && (my_rank == 0))
+						//	printf("       about to trash...\n");
 
                         //If current is a root link, trash its data
                         if (current->child == NULL)
@@ -399,6 +405,7 @@ void Advance(
                 assert(current->h > 0);
             }//endwhile
         }
+		
 		if ((print_level >= 2) && (my_rank == 0))
 			printf("[%i] Transfering data...", my_rank);
 

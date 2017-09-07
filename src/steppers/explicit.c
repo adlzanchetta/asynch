@@ -43,7 +43,8 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     double *sum = workspace->sum;
     double **temp_k = workspace->temp_k_slices;  
 
-	printf("+Using ExplicitRKSolver...\n");
+	// adlz
+	// printf("+Using ExplicitRKSolver...\n");
 
     //Get the approximate solutions from each parent
     for (unsigned int i = 0; i < link_i->num_parents; i++)
@@ -100,10 +101,10 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     for (unsigned int i = 0; i < num_stages; i++)
     {
         //v_copy_n(y_0, sum, link_i->dim);
-		printf("+begin: ");
+		/* printf("+begin: ");
 		for (unsigned int i = 0; i < link_i->dim; i++)
 			printf("%f, ", y_0[i]);
-		printf(" (y_0)\n");
+		printf(" (y_0)\n"); */
         memcpy(sum, y_0, link_i->dim * sizeof(double));
         for (unsigned int j = 0; j < i; j++)
         {
@@ -118,10 +119,10 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
 
         double dt = c[i] * h;
 
-		printf("+Pre diff: ");
+		/* printf("+Pre diff: ");
 		for (unsigned int i = 0; i < link_i->dim; i++)
 			printf("%f, ", sum[i]);
-		printf(" (sum)\n");
+		printf(" (sum)\n"); */
 
         link_i->differential(
             t + dt,
@@ -135,10 +136,10 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
             link_i->user,
             temp_k[i]);
 
-		printf("+Pos diff: ");
+		/* printf("+Pos diff: ");
 		for (unsigned int i = 0; i < link_i->dim; i++)
 			printf("%f, ", temp_k[i]);
-		printf(" (temp_k)\n");
+		printf(" (temp_k)\n"); */
     }
 
     //Build the solution
@@ -166,10 +167,10 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         temp[i] = max(fabs(new_y[i]), fabs(y_0[i])) * error->reltol[i] + error->abstol[i];
 
     err_1 = nrminf2(sum, temp, 0, link_i->dim);
-	printf("+err_1: from ");
+	/* printf("+err_1: from ");
 	for (unsigned int i = 0; i < dim; i++)
 		printf("[%f, %f], ", sum[i], temp[i]);
-	printf("got %f.\n", err_1);
+	printf("got %f.\n", err_1); */
 
     double value_1 = pow(1.0 / err_1, 1.0 / meth->e_order);
 
@@ -185,10 +186,11 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         temp[i] = max(fabs(new_y[i]), fabs(y_0[i])) * error->reltol_dense[i] + error->abstol_dense[i];
 
     err_d = nrminf2(sum, temp, 0, link_i->dim);
+	/* adlz
 	printf("+err_d: from ");
 	for (unsigned int i = 0; i < dim; i++)
 		printf("[%f, %f], ", sum[i], temp[i]);
-	printf("got %f.\n", err_d);
+	printf("got %f.\n", err_d); */
 
     double value_d = pow(1.0 / err_d, 1.0 / meth->d_order);
 
@@ -208,7 +210,8 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         }
 
         //Save the new data
-		printf("+Saving the data as (%f < 1.0) and (%f < 1.0)...\n", err_1, err_d);
+		// adlz
+		// printf("+Saving the data as (%f < 1.0) and (%f < 1.0)...\n", err_1, err_d);
         link_i->last_t = t + h;
         link_i->current_iterations++;
         store_k(workspace->temp_k, globals->max_dim, new_node->k, num_stages, dense_indices, num_dense);
@@ -332,7 +335,8 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     }
     else
     {
-		printf("+Trashing the data as (%f > 1.0) or (%f > 1.0)...\n", err_1, err_d);
+		// adlz
+		// printf("+Trashing the data as (%f > 1.0) or (%f > 1.0)...\n", err_1, err_d);
 
         //Trash the data from the failed step
         Undo_Step(&link_i->my->list);
