@@ -200,11 +200,15 @@ void Advance(
 								printf("       ...solving a leaf...\n");
                             while (current->last_t + current->h < maxtime && current->current_iterations < globals->iter_limit)
                             {
+								if ((print_level >= 2) && (my_rank == 0))
+									printf("       ...iterating 1 (%i of %i)...\n", current->current_iterations, globals->iter_limit);
                                 for (unsigned int i = 0; i < globals->num_forcings; i++)		//!!!! Put this in solver !!!!
                                     if (forcings[i].active && current->last_t < current->my->forcing_change_times[i])
                                         current->h = min(current->h, current->my->forcing_change_times[i] - current->last_t);
                                 current->rejected = current->solver(current, globals, assignments, print_flag, outputfile, &db_connections[ASYNCH_DB_LOC_HYDRO_OUTPUT], forcings, workspace);
                             }
+							if ((print_level >= 2) && (my_rank == 0))
+								printf("       ...iterating 1 done.\n");
 
                             if (current->last_t + current->h >= maxtime  && current->current_iterations < globals->iter_limit && current->last_t < maxtime)	//If less than a full step is needed, just finish up
                             {
@@ -217,12 +221,16 @@ void Advance(
 
                                 while (current->rejected == 0)
                                 {
+									if ((print_level >= 2) && (my_rank == 0))
+										printf("       ...current rejected...\n", current->current_iterations, globals->iter_limit);
                                     for (unsigned int i = 0; i < globals->num_forcings; i++)
                                         if (forcings[i].active && current->last_t < current->my->forcing_change_times[i])
                                             current->h = min(current->h, current->my->forcing_change_times[i] - current->last_t);
                                     current->h = min(current->h, maxtime - current->last_t);
                                     assert(current->h > 0);
                                     current->rejected = current->solver(current, globals, assignments, print_flag, outputfile, &db_connections[ASYNCH_DB_LOC_HYDRO_OUTPUT], forcings, workspace);
+									if ((print_level >= 2) && (my_rank == 0))
+										printf("       ...rejected: %i...\n", current->rejected);
                                 }
                             }
 							if ((print_level >= 2) && (my_rank == 0))
