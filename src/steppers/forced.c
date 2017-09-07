@@ -25,6 +25,8 @@ int ForcedSolutionSolver(Link* link_i, GlobalVars* globals, int* assignments, bo
     double t_needed;
     short int change_value = 0;
 
+	printf("Using ForcedSolutionSolver...\n");
+
     //Some variables to make things easier to read
     double *y_0 = link_i->my->list.tail->y_approx;
     double t = link_i->my->list.tail->t;

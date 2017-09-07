@@ -41,7 +41,9 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     unsigned int* dense_indices = link_i->dense_indices;
     double *temp = workspace->temp;
     double *sum = workspace->sum;
-    double **temp_k = workspace->temp_k_slices;    
+    double **temp_k = workspace->temp_k_slices;  
+
+	printf("Using ExplicitRKSolver...\n");
 
     //Get the approximate solutions from each parent
     for (unsigned int i = 0; i < link_i->num_parents; i++)
@@ -182,6 +184,7 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
         }
 
         //Save the new data
+		printf("Saving the data as (%f < 1.0) and (%f < 1.0)...\n", err_1, err_d);
         link_i->last_t = t + h;
         link_i->current_iterations++;
         store_k(workspace->temp_k, globals->max_dim, new_node->k, num_stages, dense_indices, num_dense);
@@ -305,6 +308,8 @@ int ExplicitRKSolver(Link* link_i, GlobalVars* globals, int* assignments, bool p
     }
     else
     {
+		printf("Trashing the data as (%f > 1.0) or (%f > 1.0)...\n", err_1, err_d);
+
         //Trash the data from the failed step
         Undo_Step(&link_i->my->list);
 

@@ -201,7 +201,10 @@ void Advance(
                             while (current->last_t + current->h < maxtime && current->current_iterations < globals->iter_limit)
                             {
 								if ((print_level >= 2) && (my_rank == 0))
+								{
 									printf("       ...iterating 1 (%i of %i)...\n", current->current_iterations, globals->iter_limit);
+									printf("         as %f + %f (%f) < %f.\n", current->last_t, current->h, current->last_t + current->h, maxtime);
+								}
                                 for (unsigned int i = 0; i < globals->num_forcings; i++)		//!!!! Put this in solver !!!!
                                     if (forcings[i].active && current->last_t < current->my->forcing_change_times[i])
                                         current->h = min(current->h, current->my->forcing_change_times[i] - current->last_t);
