@@ -24,7 +24,7 @@ void Advance(
     Forcing* forcings,
     ConnData* db_connections,
     TransData* my_data,
-    bool print_flag,
+    int print_level,
     FILE* outputfile)
 {
     //Initialize remaining data
@@ -34,8 +34,14 @@ void Advance(
     unsigned int last_idx, curr_idx, around;
     unsigned int two_my_N = 2 * my_N;
     int error_code;
+	bool print_flag = false;
+
+	if (print_level >= 1)
+		print_flag = true;
 	
     //Initialize values for forcing data
+	if ((print_level >= 2) && (my_rank == 0))
+		printf("[%i] Initializing forcings values...", my_rank);
     for (unsigned int i = 0; i < globals->num_forcings; i++)
     {
         if (forcings[i].active)
@@ -45,6 +51,8 @@ void Advance(
             //printf("Before: %u, %u, %u\n",i,forcings[i].passes,passes);
         }
     }
+	if ((print_level >= 2) && (my_rank == 0))
+		printf("done.\n", my_rank);
 
     ////Snapshot passes
     //if (globals->dump_loc_flag == 4)
@@ -60,10 +68,14 @@ void Advance(
 
         //Advance the current time
         globals->t = my_sys[0]->last_t;
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("[%i] Solver at %0.2f of %0.2f minutes.\n", my_rank, globals->t, globals->maxtime);
         
         memset(done, 0, my_N * sizeof(short int));
 
         //Read in next set of forcing data
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("[%i] Reading next set of forging data...", my_rank);
         double maxtime = globals->maxtime;
         for (unsigned int i = 0; i < globals->num_forcings; i++)
         {
@@ -79,8 +91,12 @@ void Advance(
                 maxtime = min(maxtime, forcings[i].maxtime);
             }
         }
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n", my_rank);
 
         //Check shapshot next time
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("[%i] Check shapshot next time...", my_rank);
         if (globals->dump_loc_flag == 4)
         {
             double next_time = fmod(globals->t, globals->dump_time);
@@ -96,10 +112,14 @@ void Advance(
 
             maxtime = min(maxtime, next_time);
         }
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n", my_rank);
 
         //If a state forcing is used, previously outputted data may need to be rewritten
         if (globals->res_flag)
         {
+			if ((print_level >= 2) && (my_rank == 0))
+				printf("[%i] Considering reservoir timeseries...", my_rank);
             for (unsigned int i = 0; i < my_N; i++)	//!!!! Can we loop over just the links with reservoirs? Improve id_to_loc. !!!!
             {
                 current = my_sys[i];
@@ -117,10 +137,16 @@ void Advance(
                     }
                 }
             }
+			if ((print_level >= 2) && (my_rank == 0))
+				printf("[%i] done.\n", my_rank);
         }
         
         // Update forcing
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("[%i] Updating forcings...", my_rank);
         Exchange_InitState_At_Forced(sys, N, assignments, getting, res_list, res_size, id_to_loc, globals);
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n", my_rank);
         
         for (unsigned int i = 0; i < my_N; i++)
         {
@@ -129,7 +155,11 @@ void Advance(
         }
 
         //This might be needed. Sometimes some procs get stuck in Finish for communication, but makes runs much slower.
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("[%i] Synchronizing processes...", my_rank);
         MPI_Barrier(MPI_COMM_WORLD);
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n[%i] Flushing...", my_rank);
         if (globals->t < globals->maxtime)
         {
             unsigned int alldone = 0;
@@ -333,12 +363,18 @@ void Advance(
                 assert(current->h > 0);
             }//endwhile
         }
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n[%i] Transfering data...", my_rank);
 
         Transfer_Data_Finish(my_data, sys, assignments, globals);
 
         //Ensure all data is received !!!! This is sloppy. Transfer_Data_Finish should handle this. !!!!
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n[%i] Transfering data again...", my_rank);
         MPI_Barrier(MPI_COMM_WORLD);
         Transfer_Data_Finish(my_data, sys, assignments, globals);
+		if ((print_level >= 2) && (my_rank == 0))
+			printf("done.\n");
 
         //if((rain_flag == 2 || rain_flag == 3) && my_rank == 0)
 //		if(my_rank == 0)
