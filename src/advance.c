@@ -159,12 +159,14 @@ void Advance(
 			printf("[%i] Synchronizing processes...", my_rank);
         MPI_Barrier(MPI_COMM_WORLD);
 		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n[%i] Flushing...", my_rank);
+			printf("done.\n[%i] Flowing...\n", my_rank);
         if (globals->t < globals->maxtime)
         {
             unsigned int alldone = 0;
             while (alldone < my_N)
             {
+				if ((print_level >= 2) && (my_rank == 0))
+					printf("[%i] Solved %i links of %i.\n", my_rank, alldone, my_N);
                 //Find the next link to iterate
                 do
                 {
@@ -175,19 +177,27 @@ void Advance(
 
                 if (around >= two_my_N)
                 {
+					if ((print_level >= 2) && (my_rank == 0))
+						printf("[%i] Just communicating...\n", alldone, my_N);
                     //Communicate with other processes
                     Transfer_Data(my_data, sys, assignments, globals);
                     around = 0;
                     curr_idx = 0;
+					if ((print_level >= 2) && (my_rank == 0))
+						printf("       ...communicated.\n", alldone, my_N);
                 }
                 else	//Compute an iteration
                 {
                     //If the current link is not too far ahead, it can compute some iterations
                     if (current->current_iterations < globals->iter_limit)
                     {
+						if ((print_level >= 2) && (my_rank == 0))
+							printf("       ...computting iteration %i (max %i).\n", current->current_iterations, globals->iter_limit);
                         //Solve a few steps of the current link
                         if (current->num_parents == 0)	//Leaf
                         {
+							if ((print_level >= 2) && (my_rank == 0))
+								printf("       ...solving a leaf...\n");
                             while (current->last_t + current->h < maxtime && current->current_iterations < globals->iter_limit)
                             {
                                 for (unsigned int i = 0; i < globals->num_forcings; i++)		//!!!! Put this in solver !!!!
@@ -215,9 +225,13 @@ void Advance(
                                     current->rejected = current->solver(current, globals, assignments, print_flag, outputfile, &db_connections[ASYNCH_DB_LOC_HYDRO_OUTPUT], forcings, workspace);
                                 }
                             }
+							if ((print_level >= 2) && (my_rank == 0))
+								printf("       leaf solved.\n");
                         }
                         else	//Has parents
                         {
+							if ((print_level >= 2) && (my_rank == 0))
+								printf("       ...solving something else...\n");
                             parentsval = 0;
                             for (unsigned int i = 0; i < current->num_parents; i++)
                                 parentsval += (current->last_t + current->h <= current->parents[i]->last_t);
@@ -289,7 +303,12 @@ void Advance(
 
                             if (current->current_iterations < globals->iter_limit)
                                 current->ready = 0;
+							if ((print_level >= 2) && (my_rank == 0))
+								printf("       solved.\n");
                         }
+
+						if ((print_level >= 2) && (my_rank == 0))
+							printf("       notifying the child...\n");
 
                         //Notify the child that a parent made progress
                         Link* child = current->child;
@@ -317,6 +336,9 @@ void Advance(
                             else
                                 child->ready = 0;
                         }
+
+						if ((print_level >= 2) && (my_rank == 0))
+							printf("       notified.\n");
 
                         //See if current has parents that hit their limit
                         for (unsigned int i = 0; i < current->num_parents; i++)
@@ -347,6 +369,9 @@ void Advance(
                         while (done[last_idx] == 1 && last_idx > 0)
                             last_idx--;
 
+						if ((print_level >= 2) && (my_rank == 0))
+							printf("       about to trash...\n");
+
                         //If current is a root link, trash its data
                         if (current->child == NULL)
                         {
@@ -364,7 +389,7 @@ void Advance(
             }//endwhile
         }
 		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n[%i] Transfering data...", my_rank);
+			printf("[%i] Transfering data...", my_rank);
 
         Transfer_Data_Finish(my_data, sys, assignments, globals);
 
