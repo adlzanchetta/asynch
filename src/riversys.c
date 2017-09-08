@@ -1593,14 +1593,6 @@ static int Load_Initial_Conditions_H5(
                 system[loc].last_t = globals->t_0;
             }
 
-			if (id == 226574)
-			{
-				printf("\n+For link %i, read : ", id);
-				for (unsigned int i = 0; i < dim; i++)
-					printf("%f, ", y_0[i]);
-				printf(" (y_0) from %s.\n", globals->init_filename);
-			}
-
             if (assignments[loc] != my_rank)
                 MPI_Send(y_0, dim, MPI_DOUBLE, assignments[loc], 2, MPI_COMM_WORLD);
             if (!(getting[loc]))

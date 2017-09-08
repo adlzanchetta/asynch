@@ -75,7 +75,10 @@ void Advance(
 
         //Read in next set of forcing data
 		if ((print_level >= 2) && (my_rank == 0))
+		{
 			printf("[%i] Reading next set of forging data...", my_rank);
+			fflush(stdout);
+		}
         double maxtime = globals->maxtime;
         for (unsigned int i = 0; i < globals->num_forcings; i++)
         {
@@ -92,11 +95,11 @@ void Advance(
             }
         }
 		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n", my_rank);
-
-        //Check shapshot next time
-		if ((print_level >= 2) && (my_rank == 0))
-			printf("[%i] Check shapshot next time...", my_rank);
+		{
+			printf("done.\n[%i] Check shapshot next time...", my_rank);
+			fflush(stdout);
+		}
+		//Check shapshot next time
         if (globals->dump_loc_flag == 4)
         {
             double next_time = fmod(globals->t, globals->dump_time);
@@ -119,7 +122,10 @@ void Advance(
         if (globals->res_flag)
         {
 			if ((print_level >= 2) && (my_rank == 0))
+			{
 				printf("[%i] Considering reservoir timeseries...", my_rank);
+				fflush(stdout);
+			}
             for (unsigned int i = 0; i < my_N; i++)	//!!!! Can we loop over just the links with reservoirs? Improve id_to_loc. !!!!
             {
                 current = my_sys[i];
@@ -143,10 +149,17 @@ void Advance(
         
         // Update forcing
 		if ((print_level >= 2) && (my_rank == 0))
+		{
 			printf("[%i] Updating forcings...", my_rank);
+			fflush(stdout);
+		}
         Exchange_InitState_At_Forced(sys, N, assignments, getting, res_list, res_size, id_to_loc, globals);
+		
 		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n", my_rank);
+		{
+			printf("done.\n[%i] Solving...", my_rank);
+			fflush(stdout);
+		}
         
         for (unsigned int i = 0; i < my_N; i++)
         {
@@ -155,18 +168,12 @@ void Advance(
         }
 
         //This might be needed. Sometimes some procs get stuck in Finish for communication, but makes runs much slower.
-		if ((print_level >= 2) && (my_rank == 0))
-			printf("[%i] Synchronizing processes...", my_rank);
         MPI_Barrier(MPI_COMM_WORLD);
-		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n[%i] Flowing...\n", my_rank);
         if (globals->t < globals->maxtime)
         {
             unsigned int alldone = 0;
             while (alldone < my_N)
             {
-				if ((print_level >= 2) && (my_rank == 0))
-					printf("[%i] Solved %i links of %i.\n", my_rank, alldone, my_N);
                 //Find the next link to iterate
                 do
                 {
@@ -177,14 +184,10 @@ void Advance(
 
                 if (around >= two_my_N)
                 {
-					if ((print_level >= 2) && (my_rank == 0))
-						printf("[%i] Just communicating...\n", alldone, my_N);
                     //Communicate with other processes
                     Transfer_Data(my_data, sys, assignments, globals);
                     around = 0;
                     curr_idx = 0;
-					if ((print_level >= 2) && (my_rank == 0))
-						printf("       ...communicated.\n", alldone, my_N);
                 }
                 else	//Compute an iteration
                 {
@@ -229,26 +232,18 @@ void Advance(
 
                                 while (current->rejected == 0)
                                 {
-									if ((print_level >= 2) && (my_rank == 0))
-										printf("       ...current rejected...\n", current->current_iterations, globals->iter_limit);
-                                    for (unsigned int i = 0; i < globals->num_forcings; i++)
+									for (unsigned int i = 0; i < globals->num_forcings; i++)
                                         if (forcings[i].active && current->last_t < current->my->forcing_change_times[i])
                                             current->h = min(current->h, current->my->forcing_change_times[i] - current->last_t);
                                     current->h = min(current->h, maxtime - current->last_t);
                                     assert(current->h > 0);
                                     current->rejected = current->solver(current, globals, assignments, print_flag, outputfile, &db_connections[ASYNCH_DB_LOC_HYDRO_OUTPUT], forcings, workspace);
-									if ((print_level >= 2) && (my_rank == 0))
-										printf("       ...rejected: %i...\n", current->rejected);
                                 }
                             }
-							if ((print_level >= 2) && (my_rank == 0))
-								printf("       leaf solved.\n");
                         }
                         else	//Has parents
                         {
-							if ((print_level >= 2) && (my_rank == 0))
-								printf("       ...solving something else...\n");
-                            parentsval = 0;
+							parentsval = 0;
                             for (unsigned int i = 0; i < current->num_parents; i++)
                                 parentsval += (current->last_t + current->h <= current->parents[i]->last_t);
 
@@ -319,12 +314,7 @@ void Advance(
 
                             if (current->current_iterations < globals->iter_limit)
                                 current->ready = 0;
-							if ((print_level >= 2) && (my_rank == 0))
-								printf("       solved.\n");
                         }
-
-						if ((print_level >= 2) && (my_rank == 0))
-							printf("       notifying the child...\n");
 
                         //Notify the child that a parent made progress
                         Link* child = current->child;
@@ -352,9 +342,6 @@ void Advance(
                             else
                                 child->ready = 0;
                         }
-
-						if ((print_level >= 2) && (my_rank == 0))
-							printf("       notified.\n");
 
                         //See if current has parents that hit their limit
                         for (unsigned int i = 0; i < current->num_parents; i++)
@@ -405,23 +392,28 @@ void Advance(
                 assert(current->h > 0);
             }//endwhile
         }
-		
+
 		if ((print_level >= 2) && (my_rank == 0))
-			printf("[%i] Transfering data...", my_rank);
+		{
+			printf("done.\n[%i] Synchronizing...", my_rank);
+			fflush(stdout);
+		}
 
         Transfer_Data_Finish(my_data, sys, assignments, globals);
 
         //Ensure all data is received !!!! This is sloppy. Transfer_Data_Finish should handle this. !!!!
-		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n[%i] Transfering data again...", my_rank);
         MPI_Barrier(MPI_COMM_WORLD);
         Transfer_Data_Finish(my_data, sys, assignments, globals);
-		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n");
 
         //if((rain_flag == 2 || rain_flag == 3) && my_rank == 0)
 //		if(my_rank == 0)
 //			printf("%i: Going to next set of forcing data, k is %i/%i\n",my_rank,k,passes-1);
+
+		if ((print_level >= 2) && (my_rank == 0))
+		{
+			printf("done.\n[%i] * * * * * * * * * * * * * * * *\n", my_rank);
+			fflush(stdout);
+		}
     }
 
     if (my_rank == 0)

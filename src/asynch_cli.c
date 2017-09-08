@@ -129,10 +129,15 @@ int main(int argc, char* argv[])
     }
 
     if (version) print_out("This is %s\n", PACKAGE_STRING);
-	if (more)
+	if ((version) && (more))
 	{
-		print_out("Starting %s...\n", PACKAGE_STRING);
-		print_level = 2;
+		print_out("Compiled under:\n");
+		print_out("- O.S.:       %s\n", OS_VERSION);
+		print_out("- Compiler:   %s\n", CC_VERSION);
+		print_out("- HDF5 lib:   %s\n", H5_VERSION);
+		print_out("- SZip:       %s\n", SZ_VERSION);
+		print_out("- ZLib:       %s\n", ZL_VERSION);
+		print_out("- PostGreSQL: %s\n", PQ_VERSION);
 	}
     if (help)
     {
@@ -145,6 +150,11 @@ int main(int argc, char* argv[])
         exit(EXIT_SUCCESS);
     }
     if (version || help) exit(EXIT_SUCCESS);
+	if (more)
+	{
+		print_out("Starting %s...\n", PACKAGE_STRING);
+		print_level = 2;
+	}
 
     //Parse remaining arguments
     char *global_filename = optparse_arg(&options);
