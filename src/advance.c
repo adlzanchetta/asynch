@@ -121,11 +121,11 @@ void Advance(
         //If a state forcing is used, previously outputted data may need to be rewritten
         if (globals->res_flag)
         {
-			if ((print_level >= 2) && (my_rank == 0))
-			{
-				printf("[%i] Considering reservoir timeseries...", my_rank);
-				fflush(stdout);
-			}
+            if ((print_level >= 2) && (my_rank == 0))
+            {
+                printf("[%i] Considering reservoir timeseries...", my_rank);
+                fflush(stdout);
+            }
             for (unsigned int i = 0; i < my_N; i++)	//!!!! Can we loop over just the links with reservoirs? Improve id_to_loc. !!!!
             {
                 current = my_sys[i];
@@ -143,8 +143,8 @@ void Advance(
                     }
                 }
             }
-			if ((print_level >= 2) && (my_rank == 0))
-				printf("[%i] done.\n", my_rank);
+            if ((print_level >= 2) && (my_rank == 0))
+                printf("done.\n", my_rank);
         }
         
         // Update forcing

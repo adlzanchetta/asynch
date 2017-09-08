@@ -7,7 +7,7 @@ AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AX_PROG_CC_MPI([], [], [AC_MSG_FAILURE([MPI compiler requested, but couldn't find MPI.])] )
 AC_PROG_CC_STDC #C99
 AM_PROG_CC_C_O  #automake < 1.14
-AM_PROG_AR
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_RANLIB
 
 # Checks for libraries
