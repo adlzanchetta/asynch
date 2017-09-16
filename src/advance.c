@@ -52,7 +52,7 @@ void Advance(
         }
     }
 	if ((print_level >= 2) && (my_rank == 0))
-		printf("done.\n", my_rank);
+		printf("done.\n");
 
     ////Snapshot passes
     //if (globals->dump_loc_flag == 4)
@@ -116,7 +116,7 @@ void Advance(
             maxtime = min(maxtime, next_time);
         }
 		if ((print_level >= 2) && (my_rank == 0))
-			printf("done.\n", my_rank);
+			printf("done.\n");
 
         //If a state forcing is used, previously outputted data may need to be rewritten
         if (globals->res_flag)
@@ -144,7 +144,7 @@ void Advance(
                 }
             }
             if ((print_level >= 2) && (my_rank == 0))
-                printf("done.\n", my_rank);
+                printf("done.\n");
         }
         
         // Update forcing

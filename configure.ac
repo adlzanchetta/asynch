@@ -17,6 +17,13 @@ AX_LIB_POSTGRESQL
 AX_BLAS
 AX_LAPACK
 
+AC_DEFINE([OS_VERSION], ["Not specified"], [TODO])
+AC_DEFINE([CC_VERSION], ["Not specified"], [TODO])
+AC_DEFINE([H5_VERSION], ["Not specified"], [TODO])
+AC_DEFINE([SZ_VERSION], ["Not specified"], [TODO])
+AC_DEFINE([ZL_VERSION], ["Not specified"], [TODO])
+AC_DEFINE([PQ_VERSION], ["Not specified"], [TODO])
+
 # Checks for packages
 PKG_CHECK_MODULES([CHECK], [check >= 0.9.8], [found_libcheck=1], [found_libcheck=0])
 PKG_CHECK_MODULES([METIS], [metis >= 5.0.0], [found_metis=1], [found_metis=0])
