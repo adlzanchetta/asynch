@@ -285,6 +285,18 @@ void SetParamSizes(
         globals->num_forcings = 3;
         globals->min_error_tolerances = 3;
         break;
+		//--------------------------------------------------------------------------------------------
+	case 196:	num_global_params = 5;
+		globals->uses_dam = 0;
+		globals->num_params = 6;
+		globals->dam_params_size = 0;
+		globals->area_idx = 0;
+		globals->areah_idx = 2;
+		globals->num_disk_params = 3;
+		globals->convertarea_flag = 0;
+		globals->num_forcings = 4;
+		globals->min_error_tolerances = 5;
+		break;
         //--------------------------------------------------------------------------------------------
     case 200:	num_global_params = 10;
         globals->uses_dam = 0;
@@ -509,7 +521,7 @@ void ConvertParams(
         params[1] *= 1000;	//L: km -> m
         params[2] *= 1e6;	//A_h: km^2 -> m^2
     }
-    else if (model_uid == 190 || model_uid == 191 || model_uid == 195)
+    else if (model_uid == 190 || model_uid == 191 || model_uid == 195 || model_uid == 196)
     {
         params[1] *= 1000;	//L: km -> m
         params[2] *= 1e6;	//A_h: km^2 -> m^2
@@ -934,7 +946,6 @@ void InitRoutines(
     }
 	else if (model_uid == 195)
     {
-		// adlz: so far, a copy of 190
         link->dim = 4;
         link->no_ini_start = 3;
         link->diff_start = 0;
@@ -948,6 +959,29 @@ void InitRoutines(
         link->check_state = NULL;
         link->check_consistency = &CheckConsistency_Nonzero_AllStates_q;
     }
+	else if (model_uid == 196)
+	{
+		link->dim = 5;
+		link->no_ini_start = 3;
+		link->diff_start = 0;
+
+		link->num_dense = 1;
+		link->dense_indices = (unsigned int*)realloc(link->dense_indices, link->num_dense * sizeof(unsigned int));
+		link->dense_indices[0] = 0;
+
+		if (link->has_res)
+		{
+			link->differential = &LinearHillslope_MonthlyEvap_OnlyRouts_HasReservoir;
+			link->solver = &ForcedSolutionSolver;
+		}
+		else
+		{
+			link->differential = &LinearHillslope_MonthlyEvap_OnlyRouts_NotReservoir;
+		}
+		link->algebraic = NULL;
+		link->check_state = NULL;
+		link->check_consistency = &CheckConsistency_Nonzero_AllStates_q;
+	}
     else if (model_uid == 200)	//This is for use with SIMPLE only
     {
         link->dim = 2;
@@ -1331,6 +1365,26 @@ void Precalculations(
         vals[4] = v_g * L_i / A_h * 60.0;	//[1/min]  k3
         vals[5] = 60.0*v_r*pow(A_i, lambda_2) / ((1.0 - lambda_1)*L_i);	//[1/min]  invtau
     }
+	else if (model_uid == 196)
+	{
+		//Order of parameters: A_i,L_i,A_h,k2,k3,invtau,c_1,c_2
+		//The numbering is:	0   1   2   3  4    5    6   7
+		//Order of global_params: v_r,lambda_1,lambda_2,RC,v_h,v_g (,v_B)
+		//The numbering is:        0      1        2     3  4   5     6
+		double* vals = params;
+		double A_i = params[0];
+		double L_i = params[1];
+		double A_h = params[2];
+		double v_r = global_params[0];
+		double lambda_1 = global_params[1];
+		double lambda_2 = global_params[2];
+		double v_h = global_params[3];
+		double v_g = global_params[4];
+
+		vals[3] = v_h * L_i / A_h * 60.0;	                            // [1/min]  k2
+		vals[4] = v_g * L_i / A_h * 60.0;	                            // [1/min]  k3
+		vals[5] = 60.0*v_r*pow(A_i, lambda_2) / ((1.0 - lambda_1)*L_i);	// [1/min]  invtau
+	}
     else if (model_uid == 20)
     {
         //Order of parameters: A_i,L_i,A_h,invtau,c_1,c_2
@@ -2062,6 +2116,11 @@ int ReadInitData(
 	{
 		//For this model_uid, the extra states need to be set (3)
 		y_0[3] = 0.0;
+	}
+	else if (model_uid == 196)
+	{
+		y_0[3] = 0.0;  // zero precip accumulation
+		y_0[4] = 0.0;  // zero runoff accumulation
 	}
     else if (model_uid == 200)
     {
