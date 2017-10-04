@@ -1344,7 +1344,7 @@ void LinearHillslope_MonthlyEvap_OnlyRouts_NotReservoir(double t, const double *
 //The numbering is:        0      1        2     3  4   5   6
 void LinearHillslope_MonthlyEvap_OnlyRouts_HasReservoir(double t, const double * const y_i, unsigned int dim, const double * const y_p, unsigned short num_parents, unsigned int max_dim, const double * const global_params, const double * const params, const double * const forcing_values, const QVSData * const qvs, int state, void* user, double *ans)
 {
-	ans[0] = forcing_values[2];
+	ans[0] = forcing_values[3];
 	ans[1] = 0.0;
 	ans[2] = 0.0;
 	ans[3] = 0.0;
