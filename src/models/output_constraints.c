@@ -1,4 +1,6 @@
 
+#include <math.h>
+
 #include <models/output_constraints.h>
 
 void OutputConstraints_Model196_Hdf5(double* states)
