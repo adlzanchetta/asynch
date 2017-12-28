@@ -272,7 +272,8 @@ void SetParamSizes(
         globals->areah_idx = 2;
         globals->num_disk_params = 3;
         globals->convertarea_flag = 0;
-        globals->num_forcings = 6;
+        globals->num_forcings = 3;
+        globals->min_error_tolerances = 3;
         break;
 		//--------------------------------------------------------------------------------------------
     case 195:	num_global_params = 5;
