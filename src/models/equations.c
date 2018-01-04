@@ -594,8 +594,8 @@ void TopLayerHillslope_spatial_velocity(double t, const double * const y_i, unsi
 //Contains 3 layers on hillslope: ponded, top layer, soil. Also has 3 extra states: total precip, total runoff, base flow
 //Order of parameters: A_i,L_i,A_h,invtau,k_2,k_i,c_1,c_2
 //The numbering is:	    0   1   2     3    4   5   6  7
-//Order of global_params: v_0,lambda_1,lambda_2,v_h,k_3,k_I,h_b,S_L,v_B
-//The numbering is:        0      1        2     3   4   5   6   7   8
+//Order of global_params: v_0,lambda_1,lambda_2,v_h,k_3,k_I_factor,h_b,S_L,v_B
+//The numbering is:        0      1        2     3   4      5       6   7   8
 void OfflineTopLayerHillslope(double t, const double * const y_i, unsigned int dim, const double * const y_p, unsigned short num_parents, unsigned int max_dim, const double * const global_params, const double * const params, const double * const forcing_values, const QVSData * const qvs, int state, void* user, double *ans)
 {
     unsigned short i;
@@ -611,7 +611,7 @@ void OfflineTopLayerHillslope(double t, const double * const y_i, unsigned int d
     double A_h = params[2];	                                       // [m^2]
     double invtau = params[3];	                                   // [1/min]
     double k_2 = params[4];	                                       // [1/min]
-    double k_i = global_params[5];	                               // [1/min]
+    double k_i = params[5];	                                       // [1/min]
     double c_1 = params[6];
     double c_2 = params[7];
 
